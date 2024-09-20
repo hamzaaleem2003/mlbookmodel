@@ -1,14 +1,4 @@
-# Initialize memory for the chatbot
-memory = ConversationBufferMemory(memory_key="chat_history", input_key="question")
 
-# Modify the RAG chain to include memory
-self.rag_chain = (
-    {"context": self.knowledge.as_retriever(), "question": RunnablePassthrough()}
-    | self.prompt
-    | self.llm
-    | StrOutputParser()
-    | memory
-)
 __import__('pysqlite3')  # Dynamically imports the pysqlite3 module
 import sys  # Imports the sys module necessary to modify system properties
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')  # Replaces the sqlite3 entry in sys.modules with pysqlite3
