@@ -1,11 +1,9 @@
-
 __import__('pysqlite3')  # Dynamically imports the pysqlite3 module
 import sys  # Imports the sys module necessary to modify system properties
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')  # Replaces the sqlite3 entry in sys.modules with pysqlite3
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -13,9 +11,8 @@ import streamlit as st
 import time
 import os
 from dotenv import load_dotenv
-
 load_dotenv()
-#done
+
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 class ChatBot():
     def __init__(self):
@@ -38,7 +35,7 @@ class ChatBot():
 
         # Initialize the Google Generative AI model
         self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GOOGLE_API_KEY)
-        self.memory = ConversationBufferMemory(memory_key="chat_history", input_key="question")
+        
         # Define the template for prompting
         self.template = """
         this is the data from the book and name of the book is "HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition", I give u access to all the data in this book , whatever question is asked you have to answer that properly and comprehensively and in detail, whenever a question is asked from this book you always have to answer the question in English language no matter if in prompt it mentions to answer in English or not, but if it specifies to answer in some other language, only then you have to change the language in giving a response.
@@ -61,7 +58,6 @@ class ChatBot():
             {"context": self.knowledge.as_retriever(), "question": RunnablePassthrough()}
             | self.prompt
             | self.llm
-            | self.memory
             | StrOutputParser()
         )
 
