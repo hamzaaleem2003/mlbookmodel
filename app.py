@@ -68,6 +68,7 @@ class ChatBot:
         return response, updated_context
 
 # Create an instance of the ChatBot class
+# Create an instance of the ChatBot class
 bot = ChatBot()
 st.set_page_config(page_title="ML Book Bot")
 with st.sidebar:
@@ -88,7 +89,9 @@ for message in st.session_state.messages:
 user_input = st.chat_input()
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
-    response, updated_context = bot.generate_response(user_input, st.session_state.context)
+    # Ensure context is a string
+    current_context = st.session_state.context if isinstance(st.session_state.context, str) else ""
+    response, updated_context = bot.generate_response(user_input, current_context)
     st.session_state.context = updated_context  # Update the context in the session state
 
     st.session_state.messages.append({"role": "assistant", "content": response})
