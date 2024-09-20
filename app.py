@@ -7,6 +7,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.memory import ConversationBufferMemory
 import streamlit as st
 import time
 import os
@@ -21,7 +22,7 @@ class ChatBot():
         
         # Load the embeddings model
         embeddings = HuggingFaceEmbeddings()
-        
+        self.memory = ConversationBufferMemory(memory_key="chat_history", input_key="question")
         # Define the collection name and persistent directory for Chroma
         collection_name = "MLbookcollection"
         persist_directory = "MLbookcollection"  # Specify the persistent directory
@@ -59,6 +60,7 @@ class ChatBot():
             | self.prompt
             | self.llm
             | StrOutputParser()
+            | self.memory
         )
 
 # Create an instance of the ChatBot class
