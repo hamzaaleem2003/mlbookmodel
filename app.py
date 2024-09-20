@@ -11,9 +11,11 @@ import streamlit as st
 import time
 import os
 from dotenv import load_dotenv
+from langchain.memory import ConversationBufferMemory
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
 class ChatBot():
     def __init__(self):
         # Initialize the API key for Google Generative AI
@@ -53,12 +55,16 @@ class ChatBot():
             input_variables=["context", "question"]
         )
         
+        # Initialize conversational memory
+        self.memory = ConversationBufferMemory(memory_key="chat_history", input_key="question")
+
         # Define the RAG chain for retrieval and generation
         self.rag_chain = (
             {"context": self.knowledge.as_retriever(), "question": RunnablePassthrough()}
             | self.prompt
             | self.llm
             | StrOutputParser()
+            | self.memory
         )
 
 # Create an instance of the ChatBot class
@@ -102,4 +108,3 @@ if st.session_state.messages[-1]["role"] != "assistant":
 
     message = {"role": "assistant", "content": response_text}
     st.session_state.messages.append(message)
-
