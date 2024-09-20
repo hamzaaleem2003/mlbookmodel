@@ -1,3 +1,14 @@
+# Initialize memory for the chatbot
+memory = ConversationBufferMemory(memory_key="chat_history", input_key="question")
+
+# Modify the RAG chain to include memory
+self.rag_chain = (
+    {"context": self.knowledge.as_retriever(), "question": RunnablePassthrough()}
+    | self.prompt
+    | self.llm
+    | StrOutputParser()
+    | memory
+)
 __import__('pysqlite3')  # Dynamically imports the pysqlite3 module
 import sys  # Imports the sys module necessary to modify system properties
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')  # Replaces the sqlite3 entry in sys.modules with pysqlite3
@@ -15,7 +26,6 @@ from langchain.memory import ConversationBufferMemory
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-
 class ChatBot():
     def __init__(self):
         # Initialize the API key for Google Generative AI
@@ -37,7 +47,7 @@ class ChatBot():
 
         # Initialize the Google Generative AI model
         self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GOOGLE_API_KEY)
-        
+        self.memory = ConversationBufferMemory(memory_key="chat_history", input_key="question")
         # Define the template for prompting
         self.template = """
         this is the data from the book and name of the book is "HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition", I give u access to all the data in this book , whatever question is asked you have to answer that properly and comprehensively and in detail, whenever a question is asked from this book you always have to answer the question in English language no matter if in prompt it mentions to answer in English or not, but if it specifies to answer in some other language, only then you have to change the language in giving a response.
@@ -55,16 +65,13 @@ class ChatBot():
             input_variables=["context", "question"]
         )
         
-        # Initialize conversational memory
-        self.memory = ConversationBufferMemory(memory_key="chat_history", input_key="question")
-
         # Define the RAG chain for retrieval and generation
         self.rag_chain = (
             {"context": self.knowledge.as_retriever(), "question": RunnablePassthrough()}
             | self.prompt
             | self.llm
-            | StrOutputParser()
             | self.memory
+            | StrOutputParser()
         )
 
 # Create an instance of the ChatBot class
@@ -108,3 +115,4 @@ if st.session_state.messages[-1]["role"] != "assistant":
 
     message = {"role": "assistant", "content": response_text}
     st.session_state.messages.append(message)
+
