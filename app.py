@@ -24,7 +24,7 @@ import os
 from dotenv import load_dotenv
 from langchain.memory import ConversationBufferMemory
 load_dotenv()
-
+#done
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 class ChatBot():
     def __init__(self):
