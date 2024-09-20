@@ -15,6 +15,7 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')  # Replaces the sqlite3 en
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferMemory
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -22,7 +23,7 @@ import streamlit as st
 import time
 import os
 from dotenv import load_dotenv
-from langchain.memory import ConversationBufferMemory
+
 load_dotenv()
 #done
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
