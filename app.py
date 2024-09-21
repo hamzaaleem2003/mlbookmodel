@@ -82,11 +82,11 @@ class ChatBot():
         self.question_answer_chain = create_stuff_documents_chain(self.llm, self.qa_prompt)
         self.rag_chain = create_retrieval_chain(history_aware_retriever, self.question_answer_chain)
         ### Statefully manage chat history ###
-        store = {}
+        self.store = {}
         def get_session_history(session_id: str) -> BaseChatMessageHistory:
-          if session_id not in store:
-            store[session_id] = ChatMessageHistory()
-          return store[session_id]
+          if session_id not in self.store:
+            self.store[session_id] = ChatMessageHistory()
+          return self.store[session_id]
         
         self.conversational_rag_chain = RunnableWithMessageHistory(
             self.rag_chain,
@@ -108,7 +108,7 @@ def generate_response_stream(input):
     config={
         "configurable": {"session_id": "abc123"}
     },  # constructs a key "abc123" in `store`.
-    )
+    )["answer"]
     # Simulate streaming by yielding one character at a time
     for char in response:
         yield char
