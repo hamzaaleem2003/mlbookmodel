@@ -2,11 +2,18 @@ __import__('pysqlite3')  # Dynamically imports the pysqlite3 module
 import sys  # Imports the sys module necessary to modify system properties
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')  # Replaces the sqlite3 entry in sys.modules with pysqlite3
 from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.vectorstores import Chroma
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.chat_history import BaseChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
 import streamlit as st
 import time
 import os
@@ -18,7 +25,8 @@ class ChatBot():
     def __init__(self):
         # Initialize the API key for Google Generative AI
         GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-        
+        # Initialize the Google Generative AI model
+        self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GOOGLE_API_KEY)
         # Load the embeddings model
         embeddings = HuggingFaceEmbeddings()
         
@@ -32,35 +40,61 @@ class ChatBot():
             persist_directory=persist_directory,
             embedding_function=embeddings
         )
+        retriever = self.knowledge.as_retriever()
 
-        # Initialize the Google Generative AI model
-        self.llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GOOGLE_API_KEY)
-        
-        # Define the template for prompting
-        self.template = """
-        this is the data from the book and name of the book is "HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition", I give u access to all the data in this book , whatever question is asked you have to answer that properly and comprehensively and in detail, whenever a question is asked from this book you always have to answer the question in English language no matter if in prompt it mentions to answer in English or not, but if it specifies to answer in some other language, only then you have to change the language in giving a response.
-
-        Context: {context}
-
-        Question: {question}
-
-        Answer:
-        """
-        
-        # Initialize the prompt template
-        self.prompt = PromptTemplate(
-            template=self.template,
-            input_variables=["context", "question"]
+        ### Contextualize question ###
+        self.contextualize_q_system_prompt = (
+          "Given a chat history and the latest user question "
+          "which might reference context in the chat history, "
+          "formulate a standalone question which can be understood "
+          "without the chat history. Do NOT answer the question, "
+          "just reformulate it if needed and otherwise return it as is."
         )
-        
-        # Define the RAG chain for retrieval and generation
-        self.rag_chain = (
-            {"context": self.knowledge.as_retriever(), "question": RunnablePassthrough()}
-            | self.prompt
-            | self.llm
-            | StrOutputParser()
+        self.contextualize_q_prompt = ChatPromptTemplate.from_messages(
+           [
+               
+             ("system", self.contextualize_q_system_prompt),
+             MessagesPlaceholder("chat_history"),
+             ("human", "{input}"),
+           ]
+        )
+        history_aware_retriever = create_history_aware_retriever(
+        self.llm, retriever, self.contextualize_q_prompt
         )
 
+
+
+
+        # 2. Incorporate the retriever into a question-answering chain.
+        self.system_prompt = (
+                        '''
+                        this is the data from the book and name of the book is "HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition", I give u access to all the data in this book , whatever question is asked you have to answer that properly and comprehensively and in detail, whenever a question is asked from this book you always have to answer the question in English language no matter if in prompt it mentions to answer in English or not, but if it specifies to answer in some other language, only then you have to change the language in giving a response.
+                        '''
+                        "{context}"
+                        )
+        self.qa_prompt = ChatPromptTemplate.from_messages(
+           [
+        ("system", self.system_prompt),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+           ]
+        )
+        self.question_answer_chain = create_stuff_documents_chain(self.llm, self.qa_prompt)
+        self.rag_chain = create_retrieval_chain(history_aware_retriever, self.question_answer_chain)
+        ### Statefully manage chat history ###
+        store = {}
+        def get_session_history(session_id: str) -> BaseChatMessageHistory:
+          if session_id not in store:
+            store[session_id] = ChatMessageHistory()
+          return store[session_id]
+        
+        self.conversational_rag_chain = RunnableWithMessageHistory(
+            self.rag_chain,
+            get_session_history,
+            input_messages_key="input",
+            history_messages_key="chat_history",
+            output_messages_key="answer",
+        )
 # Create an instance of the ChatBot class
 bot = ChatBot()
 st.set_page_config(page_title="ML Book Bot")
@@ -69,7 +103,12 @@ with st.sidebar:
 
 # Function for generating LLM response incrementally
 def generate_response_stream(input):
-    response = bot.rag_chain.invoke(input)
+    response = bot.conversational_rag_chain.invoke(
+        {"input": input},
+    config={
+        "configurable": {"session_id": "abc123"}
+    },  # constructs a key "abc123" in `store`.
+    )
     # Simulate streaming by yielding one character at a time
     for char in response:
         yield char
