@@ -94,7 +94,7 @@ conversational_rag_chain = RunnableWithMessageHistory(
 # Create an instance of the ChatBot class
 st.set_page_config(page_title="ML Book Bot")
 with st.sidebar:
-    st.title('ML Book Bot')
+    st.title('HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition')
 
 # Function for generating LLM response incrementally
 def generate_response_stream(user_input):
