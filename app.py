@@ -100,13 +100,28 @@ conversational_rag_chain = RunnableWithMessageHistory(
 
 # 8. Function to inject custom CSS
 def inject_custom_css():
-    # Remove sidebar background image CSS
-    # Only set the main chat area background color to light blue
+    # Set the main chat area background color to Sky Blue
+    # Set the sidebar background color to Light Pink
     custom_css = f"""
     <style>
     /* Main chat area background color */
     .block-container {{
-        background-color: #ADD8E6; /* Light Blue */
+        background-color: #87CEEB; /* Sky Blue */
+    }}
+
+    /* Sidebar background color */
+    [data-testid="stSidebar"] > div:first-child {{
+        background-color: #FFB6C1; /* Light Pink */
+    }}
+
+    /* Optional: Adjust sidebar text color for better visibility */
+    [data-testid="stSidebar"] .css-1d391kg {{
+        color: black; /* Change to black for better contrast against light pink */
+    }}
+
+    /* Optional: Remove padding from the main container for full background */
+    .block-container {{
+        padding: 1rem 2rem;
     }}
     </style>
     """
