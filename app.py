@@ -109,7 +109,7 @@ def inject_custom_css():
 
     /* Sidebar background color */
     [data-testid="stSidebar"] > div:first-child {
-        background-color: #FFB6C1; /* Light Pink */
+        background-color: #FFE0E9; /* Light Pink */
     }
 
     /* Adjust sidebar text color for better visibility */
