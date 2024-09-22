@@ -100,27 +100,10 @@ conversational_rag_chain = RunnableWithMessageHistory(
 
 # 8. Function to inject custom CSS
 def inject_custom_css():
-    # Add background image to sidebar
-    try:
-        with open("src/backgroundpic.jpg", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode()
-        sidebar_bg = f"background-image: url('data:image/jpeg;base64,{encoded_string}');"
-    except FileNotFoundError:
-        sidebar_bg = "background-color: #f0f2f6;"  # Default sidebar color if image not found
-
+    # Remove sidebar background image CSS
+    # Only set the main chat area background color to light blue
     custom_css = f"""
     <style>
-    /* Sidebar background image */
-    [data-testid="stSidebar"] > div:first-child {{
-        {sidebar_bg}
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-    }}
-    /* Sidebar content styling */
-    [data-testid="stSidebar"] .css-1d391kg {{
-        color: white;
-    }}
     /* Main chat area background color */
     .block-container {{
         background-color: #ADD8E6; /* Light Blue */
@@ -132,10 +115,16 @@ def inject_custom_css():
 # Inject the custom CSS
 inject_custom_css()
 
-# 9. Create the sidebar with the title and possibly other elements
+# 9. Create the sidebar with the title and image
 with st.sidebar:
     st.title('Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow 3rd Edition')
-    # Optionally, you can add other sidebar elements here
+    # Insert the background image below the title
+    # Ensure the path is correct relative to your script
+    image_path = os.path.join("src", "backgroundpic.jpg")
+    if os.path.exists(image_path):
+        st.image(image_path, use_column_width=True, caption=None)
+    else:
+        st.warning("Background image not found in the 'src' folder.")
 
 # 10. Function for generating LLM response incrementally
 def generate_response_stream(user_input):
