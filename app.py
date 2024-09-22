@@ -125,7 +125,7 @@ def inject_custom_css():
 inject_custom_css()
 
 # Create an instance of the ChatBot class
-st.set_page_config(page_title="ML Book Bot")
+st.set_page_config(page_title="HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition")
 
 with st.sidebar:
     st.title('HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition')
