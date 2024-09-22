@@ -1,23 +1,26 @@
-__import__('pysqlite3')  # Dynamically imports the pysqlite3 module
-import sys  # Imports the sys module necessary to modify system properties
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')  # Replaces the sqlite3 entry in sys.modules with pysqlite3
+import sys
+import os
+import time
+import base64
+from dotenv import load_dotenv
+import streamlit as st
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.vectorstores import Chroma
-import time as t
-
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
-import streamlit as st
-import time
-import os
-from dotenv import load_dotenv
+
+# Load environment variables
 load_dotenv()
+
+# Replace sqlite3 with pysqlite3
+__import__('pysqlite3')
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 # Initialize the API key for Google Generative AI
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -91,8 +94,39 @@ conversational_rag_chain = RunnableWithMessageHistory(
     history_messages_key="chat_history",
     output_messages_key="answer",
 )
+
+# Function to inject custom CSS
+def inject_custom_css():
+    # Add background image to sidebar
+    with open("src/backgroundpic.jpg", "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode()
+    sidebar_style = f"""
+    <style>
+    /* Sidebar background image */
+    .css-1d391kg {{
+        background-image: url("data:image/jpeg;base64,{encoded_string}");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+    }}
+    /* Adjust sidebar text color for better visibility */
+    .css-1d391kg .sidebar-content {{
+        color: white;
+    }}
+    /* Main chat area background color */
+    .block-container {{
+        background-color: #87CEEB; /* Sky Blue */
+    }}
+    </style>
+    """
+    st.markdown(sidebar_style, unsafe_allow_html=True)
+
+# Inject the custom CSS
+inject_custom_css()
+
 # Create an instance of the ChatBot class
 st.set_page_config(page_title="ML Book Bot")
+
 with st.sidebar:
     st.title('HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition')
 
