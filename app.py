@@ -5,9 +5,6 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.vectorstores import Chroma
-from langchain.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -18,6 +15,8 @@ import streamlit as st
 import time
 import os
 from dotenv import load_dotenv
+import base64  # For encoding image and video files
+
 load_dotenv()
 
 # Initialize the API key for Google Generative AI
@@ -91,10 +90,34 @@ conversational_rag_chain = RunnableWithMessageHistory(
     history_messages_key="chat_history",
     output_messages_key="answer",
 )
-# Create an instance of the ChatBot class
+
+# Set up the Streamlit page
 st.set_page_config(page_title="ML Book Bot")
+
+# Set background image for the main chat area
+page_bg_img = '''
+<style>
+.stApp {
+  background-image: url("src/background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+</style>
+'''
+
+st.markdown(page_bg_img, unsafe_allow_html=True)
+
 with st.sidebar:
     st.title('ML Book Bot')
+
+    # Display the background video in the sidebar
+    # Read video file
+    video_file = open('src/sidebar_video.mp4', 'rb')
+    video_bytes = video_file.read()
+    # Display the video
+    st.video(video_bytes, format="video/mp4", start_time=0)
 
 # Function for generating LLM response incrementally
 def generate_response_stream(user_input):
