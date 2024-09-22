@@ -1,6 +1,6 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+__import__('pysqlite3')  # Dynamically imports the pysqlite3 module
+import sys  # Imports the sys module necessary to modify system properties
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')  # Replaces the sqlite3 entry in sys.modules with pysqlite3
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
@@ -15,8 +15,6 @@ import streamlit as st
 import time
 import os
 from dotenv import load_dotenv
-import base64
-
 load_dotenv()
 
 # Initialize the API key for Google Generative AI
@@ -28,7 +26,7 @@ embeddings = HuggingFaceEmbeddings()
 
 # Define the collection name and persistent directory for Chroma
 collection_name = "MLbookcollection"
-persist_directory = "MLbookcollection"
+persist_directory = "MLbookcollection"  # Specify the persistent directory
 
 # Initialize Chroma by loading the existing collection
 knowledge = Chroma(
@@ -91,91 +89,32 @@ conversational_rag_chain = RunnableWithMessageHistory(
     output_messages_key="answer",
 )
 
-# Set up the Streamlit page
+st.markdown(
+    """
+    <style>
+    /* Main chat area */
+    .stApp {
+        background-color: skyblue !important;
+    }
+    /* Sidebar styles */
+    .stSidebar > div:first-child {
+        background: url("src/sidebar_video.mp4") no-repeat center center fixed; 
+        background-size: cover;
+    }
+    /* Center the title in the sidebar */
+    .sidebar .css-1g1hycs {
+        text-align: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# Create an instance of the ChatBot class
 st.set_page_config(page_title="ML Book Bot")
-
-# Read and encode the sidebar video
-with open('src/sidebar_video.mp4', 'rb') as f:
-    video_data = f.read()
-    encoded_video = base64.b64encode(video_data).decode()
-
-# Apply custom CSS
-custom_css = f'''
-<style>
-/* Background color for main content */
-.stApp {{
-    background-color: skyblue;
-    padding-top: 0px;
-}}
-
-/* Ensure chat input box is visible */
-.css-1n76uvr.e1tzin5v2 {{
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-}}
-
-/* Sidebar styling */
-[data-testid="stSidebar"] {{
-    position: relative;
-    overflow: hidden;
-    background: none;
-    width: 100%;
-    height: 100%;
-    padding-top: 0px;
-}}
-
-[data-testid="stSidebar"] > div:first-child {{
-    position: relative;
-    z-index: 1;
-}}
-
-[data-testid="stSidebar"]::before {{
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Optional: Add overlay */
-    z-index: 2;
-}}
-
-.sidebar-video {{
-    position: absolute;
-    top: 0;
-    left: 0;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    z-index: 0;
-    object-fit: cover;
-}}
-
-/* Center the sidebar title */
-.sidebar-content h1 {{
-    text-align: center;
-}}
-
-</style>
-'''
-
-# Embed the CSS and video in the sidebar
-st.markdown(custom_css, unsafe_allow_html=True)
-
-# Sidebar with background video
 with st.sidebar:
-    # Display the video
-    sidebar_video_html = f'''
-    <div class="sidebar-content">
-        <video class="sidebar-video" autoplay loop muted playsinline>
-            <source src="data:video/mp4;base64,{encoded_video}" type="video/mp4">
-        </video>
-        <!-- Sidebar content -->
-        <h1>ML Book Bot</h1>
-    </div>
-    '''
-    st.markdown(sidebar_video_html, unsafe_allow_html=True)
+    st.title('ML Book Bot')
 
 # Function for generating LLM response incrementally
 def generate_response_stream(user_input):
@@ -183,7 +122,7 @@ def generate_response_stream(user_input):
         {"input": user_input},
         config={
             "configurable": {"session_id": "abc123"}
-        },
+        },  # constructs a key "abc123" in `store`.
     )["answer"]
     # Simulate streaming by yielding one character at a time
     for char in response:
@@ -205,9 +144,9 @@ if user_input := st.chat_input():
     with st.chat_message("user"):
         st.write(user_input)
 
-    # Generate a new response
+    # Generate a new response if the last message is not from the assistant
     with st.chat_message("assistant"):
-        response_container = st.empty()
+        response_container = st.empty()  # Create an empty container for streaming the response
         response_text = ""
 
         for char in generate_response_stream(user_input):
