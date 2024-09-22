@@ -93,7 +93,7 @@ st.markdown(
     """
     <style>
     /* Main chat area */
-    .stApp {
+    body {
         background-color: skyblue !important;
     }
     /* Sidebar styles */
@@ -102,8 +102,8 @@ st.markdown(
         background-size: cover;
     }
     /* Center the title in the sidebar */
-    .sidebar .css-1g1hycs {
-        text-align: center;
+    .css-1g1hycs {
+        text-align: center !important;
     }
     </style>
     """,
