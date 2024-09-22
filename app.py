@@ -103,23 +103,18 @@ def inject_custom_css():
     custom_css = """
     <style>
     /* Main chat area background color */
-    .block-container {
-        background-color: #87CEEB !important; /* Sky Blue */
+    [data-testid="stAppViewContainer"] > .main {
+        background-color: #87CEEB; /* Sky Blue */
     }
 
     /* Sidebar background color */
     [data-testid="stSidebar"] > div:first-child {
-        background-color: #FFB6C1 !important; /* Light Pink */
+        background-color: #FFB6C1; /* Light Pink */
     }
 
     /* Adjust sidebar text color for better visibility */
     [data-testid="stSidebar"] .css-1d391kg {
         color: black !important; /* Change to black for better contrast against light pink */
-    }
-
-    /* Optional: Remove padding from the main container for full background */
-    .block-container {
-        padding: 1rem 2rem;
     }
 
     /* Ensure chat messages have transparent backgrounds to show the main chat area color */
