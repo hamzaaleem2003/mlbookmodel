@@ -94,30 +94,65 @@ conversational_rag_chain = RunnableWithMessageHistory(
 # Set up the Streamlit page
 st.set_page_config(page_title="ML Book Bot")
 
-# Set background image for the main chat area
-page_bg_img = '''
+# Read the background image and encode it
+with open('src/background.jpg', 'rb') as f:
+    image_data = f.read()
+    encoded_image = base64.b64encode(image_data).decode()
+
+# Set background image using base64-encoded data
+page_bg_img = f'''
 <style>
-.stApp {
-  background-image: url("src/background.jpg");
+.stApp {{
+  background-image: url("data:image/jpg;base64,{encoded_image}");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-}
+}}
 </style>
 '''
 
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
+# Sidebar with background video
 with st.sidebar:
     st.title('ML Book Bot')
 
-    # Display the background video in the sidebar
-    # Read video file
-    video_file = open('src/sidebar_video.mp4', 'rb')
-    video_bytes = video_file.read()
-    # Display the video
-    st.video(video_bytes, format="video/mp4", start_time=0)
+    # Read the video file and encode it
+    with open('src/sidebar_video.mp4', 'rb') as f:
+        video_data = f.read()
+        encoded_video = base64.b64encode(video_data).decode()
+
+    # CSS and HTML to display the video as sidebar background
+    sidebar_bg_video = f'''
+    <style>
+    [data-testid="stSidebar"] > div:first-child {{
+        background: none;
+        padding: 0;
+    }}
+    .sidebar-container {{
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+    }}
+    .sidebar-container video {{
+        position: absolute;
+        top: 0;
+        left: 0;
+        min-width: 100%;
+        min-height: 100%;
+        object-fit: cover;
+    }}
+    </style>
+    <div class="sidebar-container">
+        <video autoplay loop muted playsinline>
+            <source src="data:video/mp4;base64,{encoded_video}" type="video/mp4">
+        </video>
+    </div>
+    '''
+
+    st.markdown(sidebar_bg_video, unsafe_allow_html=True)
 
 # Function for generating LLM response incrementally
 def generate_response_stream(user_input):
