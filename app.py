@@ -167,7 +167,7 @@ if user_input := st.chat_input():
         st.write(user_input)
 
     # Generate a new response if the last message is not from the assistant
-    with st.chat_message(avatar="🦖"):
+    with st.chat_message("assistant"):
         response_container = st.empty()  # Create an empty container for streaming the response
         response_text = ""
 
