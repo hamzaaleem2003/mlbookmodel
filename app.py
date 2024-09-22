@@ -5,6 +5,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.vectorstores import Chroma
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -88,29 +89,6 @@ conversational_rag_chain = RunnableWithMessageHistory(
     history_messages_key="chat_history",
     output_messages_key="answer",
 )
-
-st.markdown(
-    """
-    <style>
-    /* Main chat area */
-    body {
-        background-color: skyblue !important;
-    }
-    /* Sidebar styles */
-    .stSidebar > div:first-child {
-        background: url("src/sidebar_video.mp4") no-repeat center center fixed; 
-        background-size: cover;
-    }
-    /* Center the title in the sidebar */
-    .css-1g1hycs {
-        text-align: center !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-
 # Create an instance of the ChatBot class
 st.set_page_config(page_title="ML Book Bot")
 with st.sidebar:
