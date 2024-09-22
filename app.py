@@ -103,11 +103,6 @@ conversational_rag_chain = RunnableWithMessageHistory(
 def inject_custom_css():
     custom_css = """
     <style>
-    /* Main chat area background color */
-    [data-testid="stAppViewContainer"] > .main {
-        background-color: #FFFFFF ; /* WHITE */
-
-    }
 
     /* Sidebar background color */
     [data-testid="stSidebar"] > div:first-child {
