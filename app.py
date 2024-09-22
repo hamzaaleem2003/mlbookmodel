@@ -67,7 +67,7 @@ history_aware_retriever = create_history_aware_retriever(
 system_prompt = (
     '''
     This is the data from the book named "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow 3rd Edition". I give you access to all the data in this book. Whatever question is asked, you have to answer it properly, comprehensively, and in detail. Whenever a question is asked from this book, you always have to answer the question in English language no matter if in prompt it mentions to answer in English or not, but if it specifies to answer in some other language, only then you have to change the language in giving a response.
-    One thing also u have to remember that your owner and the one who created u is "Mr Hamza Aleem" which is student of electrical engineering at "NUST" in Pakistan,and he is expert in microwave angineering and antennae design.
+    One thing also you have to remember that your owner and the one who created you is "Mr Hamza Aleem" who is a student of electrical engineering at "NUST" in Pakistan, and he is an expert in microwave engineering and antenna design.
     '''
     "{context}"
 )
@@ -100,29 +100,32 @@ conversational_rag_chain = RunnableWithMessageHistory(
 
 # 8. Function to inject custom CSS
 def inject_custom_css():
-    # Set the main chat area background color to Sky Blue
-    # Set the sidebar background color to Light Pink
-    custom_css = f"""
+    custom_css = """
     <style>
     /* Main chat area background color */
-    .block-container {{
-        background-color: #87CEEB; /* Sky Blue */
-    }}
+    .block-container {
+        background-color: #87CEEB !important; /* Sky Blue */
+    }
 
     /* Sidebar background color */
-    [data-testid="stSidebar"] > div:first-child {{
-        background-color: #FFB6C1; /* Light Pink */
-    }}
+    [data-testid="stSidebar"] > div:first-child {
+        background-color: #FFB6C1 !important; /* Light Pink */
+    }
 
-    /* Optional: Adjust sidebar text color for better visibility */
-    [data-testid="stSidebar"] .css-1d391kg {{
-        color: black; /* Change to black for better contrast against light pink */
-    }}
+    /* Adjust sidebar text color for better visibility */
+    [data-testid="stSidebar"] .css-1d391kg {
+        color: black !important; /* Change to black for better contrast against light pink */
+    }
 
     /* Optional: Remove padding from the main container for full background */
-    .block-container {{
+    .block-container {
         padding: 1rem 2rem;
-    }}
+    }
+
+    /* Ensure chat messages have transparent backgrounds to show the main chat area color */
+    .stChatMessage, .stChatMessage * {
+        background-color: transparent !important;
+    }
     </style>
     """
     st.markdown(custom_css, unsafe_allow_html=True)
@@ -133,8 +136,7 @@ inject_custom_css()
 # 9. Create the sidebar with the title and image
 with st.sidebar:
     st.title('Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow 3rd Edition')
-    # Insert the background image below the title
-    # Ensure the path is correct relative to your script
+    # Insert the image below the title
     image_path = os.path.join("src", "backgroundpic.jpg")
     if os.path.exists(image_path):
         st.image(image_path, use_column_width=True, caption=None)
