@@ -105,7 +105,7 @@ def inject_custom_css():
     <style>
     /* Main chat area background color */
     [data-testid="stAppViewContainer"] > .main {
-        background-color: #D9F28F ; /* Sky Blue */
+        background-color: #C3EA4A ; /* Sky Blue */
 
     }
 
