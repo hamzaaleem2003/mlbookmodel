@@ -15,25 +15,28 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 
-# Load environment variables
+# 1. Set Streamlit page configuration as the first Streamlit command
+st.set_page_config(page_title="ML Book Bot")
+
+# 2. Load environment variables
 load_dotenv()
 
-# Replace sqlite3 with pysqlite3
+# 3. Replace sqlite3 with pysqlite3
 __import__('pysqlite3')
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
-# Initialize the API key for Google Generative AI
+# 4. Initialize the API key for Google Generative AI
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 # Initialize the Google Generative AI model
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=GOOGLE_API_KEY)
 # Load the embeddings model
 embeddings = HuggingFaceEmbeddings()
 
-# Define the collection name and persistent directory for Chroma
+# 5. Define the collection name and persistent directory for Chroma
 collection_name = "MLbookcollection"
 persist_directory = "MLbookcollection"  # Specify the persistent directory
 
-# Initialize Chroma by loading the existing collection
+# 6. Initialize Chroma by loading the existing collection
 knowledge = Chroma(
     collection_name=collection_name,
     persist_directory=persist_directory,
@@ -60,7 +63,7 @@ history_aware_retriever = create_history_aware_retriever(
     llm, retriever, contextualize_q_prompt
 )
 
-# 2. Incorporate the retriever into a question-answering chain.
+# 7. Incorporate the retriever into a question-answering chain.
 system_prompt = (
     '''
     This is the data from the book named "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow 3rd Edition". I give you access to all the data in this book. Whatever question is asked, you have to answer it properly, comprehensively, and in detail. Whenever a question is asked from this book, you always have to answer the question in English language no matter if in prompt it mentions to answer in English or not, but if it specifies to answer in some other language, only then you have to change the language in giving a response.
@@ -95,42 +98,46 @@ conversational_rag_chain = RunnableWithMessageHistory(
     output_messages_key="answer",
 )
 
-# Function to inject custom CSS
+# 8. Function to inject custom CSS
 def inject_custom_css():
     # Add background image to sidebar
-    with open("src/backgroundpic.jpg", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode()
-    sidebar_style = f"""
+    try:
+        with open("src/backgroundpic.jpg", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+        sidebar_bg = f"background-image: url('data:image/jpeg;base64,{encoded_string}');"
+    except FileNotFoundError:
+        sidebar_bg = "background-color: #f0f2f6;"  # Default sidebar color if image not found
+
+    custom_css = f"""
     <style>
     /* Sidebar background image */
-    .css-1d391kg {{
-        background-image: url("data:image/jpeg;base64,{encoded_string}");
+    [data-testid="stSidebar"] > div:first-child {{
+        {sidebar_bg}
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
     }}
-    /* Adjust sidebar text color for better visibility */
-    .css-1d391kg .sidebar-content {{
+    /* Sidebar content styling */
+    [data-testid="stSidebar"] .css-1d391kg {{
         color: white;
     }}
     /* Main chat area background color */
     .block-container {{
-        background-color: #87CEEB; /* Sky Blue */
+        background-color: #ADD8E6; /* Light Blue */
     }}
     </style>
     """
-    st.markdown(sidebar_style, unsafe_allow_html=True)
+    st.markdown(custom_css, unsafe_allow_html=True)
 
 # Inject the custom CSS
 inject_custom_css()
 
-# Create an instance of the ChatBot class
-st.set_page_config(page_title="HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition")
-
+# 9. Create the sidebar with the title and possibly other elements
 with st.sidebar:
-    st.title('HandsOn Machine Learning with ScikitLearn Keras and TensorFlow 3rd Edition')
+    st.title('Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow 3rd Edition')
+    # Optionally, you can add other sidebar elements here
 
-# Function for generating LLM response incrementally
+# 10. Function for generating LLM response incrementally
 def generate_response_stream(user_input):
     response = conversational_rag_chain.invoke(
         {"input": user_input},
@@ -143,16 +150,16 @@ def generate_response_stream(user_input):
         yield char
         time.sleep(0.005)  # Adjust this to control the typing speed
 
-# Store LLM generated responses
+# 11. Store LLM generated responses
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Welcome, ask me anything from your book"}]
 
-# Display chat messages
+# 12. Display chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-# User-provided prompt
+# 13. User-provided prompt
 if user_input := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
