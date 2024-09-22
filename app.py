@@ -102,7 +102,7 @@ with open('src/background.jpg', 'rb') as f:
 # Set background image using base64-encoded data
 page_bg_img = f'''
 <style>
-.stApp {{
+body {{
   background-image: url("data:image/jpg;base64,{encoded_image}");
   background-size: cover;
   background-position: center;
@@ -126,30 +126,35 @@ with st.sidebar:
     # CSS and HTML to display the video as sidebar background
     sidebar_bg_video = f'''
     <style>
-    [data-testid="stSidebar"] > div:first-child {{
-        background: none;
-        padding: 0;
-    }}
-    .sidebar-container {{
+    [data-testid="stSidebar"] {{
         position: relative;
-        width: 100%;
-        height: 100vh;
         overflow: hidden;
     }}
-    .sidebar-container video {{
+    [data-testid="stSidebar"]::before {{
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        z-index: -1;
+    }}
+    [data-testid="stSidebar"] video {{
         position: absolute;
         top: 0;
         left: 0;
         min-width: 100%;
         min-height: 100%;
+        width: auto;
+        height: auto;
+        z-index: -2;
         object-fit: cover;
     }}
     </style>
-    <div class="sidebar-container">
-        <video autoplay loop muted playsinline>
-            <source src="data:video/mp4;base64,{encoded_video}" type="video/mp4">
-        </video>
-    </div>
+    <video autoplay loop muted playsinline>
+        <source src="data:video/mp4;base64,{encoded_video}" type="video/mp4">
+    </video>
     '''
 
     st.markdown(sidebar_bg_video, unsafe_allow_html=True)
@@ -160,7 +165,7 @@ def generate_response_stream(user_input):
         {"input": user_input},
         config={
             "configurable": {"session_id": "abc123"}
-        },  # constructs a key "abc123" in `store`.
+        },
     )["answer"]
     # Simulate streaming by yielding one character at a time
     for char in response:
