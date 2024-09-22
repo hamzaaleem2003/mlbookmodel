@@ -124,16 +124,16 @@ def inject_custom_css():
 
     /* Customize the assistant's avatar background */
     /* Replace '.assistant-avatar' with the actual class or selector for the assistant's avatar */
-    .assistant-avatar {
+    [data-testid="stChatMessage"] .stChatMessage__avatar {
         background-color: #FFD700 !important; /* Gold color */
-        border-radius: 50%; /* Make it circular */
+        border-radius: 50% !important; /* Make it circular */
     }
 
-    /* If you have a specific class or data-testid for the assistant's avatar, use that instead */
+    /* If the above selector doesn't work, try a more specific one based on your app's structure */
     /* Example:
     [data-testid="stChatMessage"] .assistant-avatar {
         background-color: #FFD700 !important;
-        border-radius: 50%;
+        border-radius: 50% !important;
     }
     */
     </style>
