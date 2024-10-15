@@ -6,4 +6,5 @@ langchain-community
 chromadb
 pysqlite3-binary
 sentence-transformers
+protobuf==3.20.*
 
