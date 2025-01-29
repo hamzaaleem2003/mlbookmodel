@@ -136,7 +136,7 @@ with st.sidebar:
     # Insert the image below the title
     image_path = os.path.join("src", "backgroundpic.jpg")
     if os.path.exists(image_path):
-        st.image(image_path, use_column_width=True, caption=None)
+        st.image(image_path, use_container_width=True, caption=None)
     else:
         st.warning("Background image not found in the 'src' folder.")
 
